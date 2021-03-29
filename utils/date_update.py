@@ -17,7 +17,7 @@ def dateUpdater():
     if num == 4 or num == 5:
         flag = 0
 
-    telegram_users_database.UsersDatabase.add_date(day, month, flag, row, column)
+#    telegram_users_database.UsersDatabase.add_date(day, month, flag, row, column)
     print("done")
 
 

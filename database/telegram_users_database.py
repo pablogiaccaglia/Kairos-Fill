@@ -5,25 +5,35 @@ Created on
 """
 
 ### MODULES
-
-import mysql.connector
+import os
+import psycopg2
 
 
 # Database
 
 class UsersDatabase:
-    HOST = "michaelfareshi.mysql.pythonanywhere-services.com"
-    USER = "michaelfareshi"
-    PASSWORD = "pepsikola"
-    DATABASE = "michaelfareshi$datiUtente"
+    HOST = "ec2-54-228-9-90.eu-west-1.compute.amazonaws.com"
+    USER = "bawkwgdetghigk"
+    PASSWORD = "171742fdd917757f31c2eed21580bd8008e142e0a07ef64d26bc3b01166a9761"
+    DATABASE = "d2ka7f1q4au9tm"
 
-    def get_users(self):
-        MYDB = mysql.connector.connect(
+
+    @staticmethod
+    def __dbconnect():
+        MYDB = psycopg2.connect(
             host=UsersDatabase.HOST,
             user=UsersDatabase.USER,
             password=UsersDatabase.PASSWORD,
             database=UsersDatabase.DATABASE
         )
+        return MYDB
+
+
+
+
+    @staticmethod
+    def get_users():
+        MYDB = UsersDatabase.__dbconnect()
         mycursor = MYDB.cursor()
         mycursor.execute("SELECT * FROM users")
         myresult = mycursor.fetchall()
@@ -31,12 +41,12 @@ class UsersDatabase:
 
         for user in myresult:
             user_dict = {
-                'CodMatricola': str(user[2]),
-                'Password': int(user[3]),
-                'Biblioteca': user[4],
-                'Aula': user[5],
-                'user_id': str(user[6])
-                         }
+                'student_id': str(user[0]),
+                'user_pw': (user[1]),
+                'library': user[2],
+                'hall': user[3],
+                'user_id': str(user[4])
+            }
             users.append(user_dict)
 
         mycursor.close()
@@ -44,73 +54,46 @@ class UsersDatabase:
 
         return users
 
-    def add_user(self, student_id, password, library, hall, user_id):
-        MYDB = mysql.connector.connect(
-            host=UsersDatabase.HOST,
-            user=UsersDatabase.USER,
-            password=UsersDatabase.PASSWORD,
-            database=UsersDatabase.DATABASE
-        )
-        sql = "INSERT INTO users (CodMatricola, Password, Biblioteca, Aula, chat_id) VALUES (%s,%s,%s,%s,%s)"
-        val = (self, student_id, password, library, hall, user_id)
+    @staticmethod
+    def add_user(student_id, password, library, hall, user_id):
+
+        sql = "INSERT INTO users (user_id, user_pw, library, hall, chat_id) VALUES (%s,%s,%s,%s,%s)"
+        val = (student_id, password, library, hall, user_id)
+        MYDB = UsersDatabase.__dbconnect()
         mycursor = MYDB.cursor()
         mycursor.execute(sql, val)
         MYDB.commit()
         mycursor.close()
         MYDB.close()
 
-    def delete_user(self, student_id):
-        MYDB = mysql.connector.connect(
-            host=UsersDatabase.HOST,
-            user=UsersDatabase.USER,
-            password=UsersDatabase.PASSWORD,
-            database=UsersDatabase.DATABASE
-        )
+    @staticmethod
+    def delete_user(student_id):
 
-        sql = f"DELETE FROM users WHERE CodMatricola={student_id}"
+        sql = f"DELETE FROM users WHERE user_id={student_id}"
+        MYDB = UsersDatabase.__dbconnect()
         mycursor = MYDB.cursor()
         mycursor.execute(sql)
         MYDB.commit()
         mycursor.close()
         MYDB.close()
 
-    def add_date(self, day, month, flag, row, column):
-        MYDB = mysql.connector.connect(
-            host=UsersDatabase.HOST,
-            user=UsersDatabase.USER,
-            password=UsersDatabase.PASSWORD,
-            database=UsersDatabase.DATABASE
-        )
 
-        sql = f"UPDATE date SET DAY={day}, MONTH={month}, FLAG={flag}, ROW={row}, COL={column}"
-        mycursor = MYDB.cursor()
-        mycursor.execute(sql)
-        MYDB.commit()
-        mycursor.close()
-        MYDB.close()
 
-    def get_date(self):
-        MYDB = mysql.connector.connect(
-            host=UsersDatabase.HOST,
-            user=UsersDatabase.USER,
-            password=UsersDatabase.PASSWORD,
-            database=UsersDatabase.DATABASE
-        )
+    @staticmethod
+    def get_date():
 
+        MYDB = UsersDatabase.__dbconnect()
         mycursor = MYDB.cursor()
         mycursor.execute("SELECT * FROM date")
         date = mycursor.fetchall()
-
+        mycursor.close()
+        MYDB.close()
         return date[0]
 
-    def get_user(self, chat_id):
-        MYDB = mysql.connector.connect(
-            host=UsersDatabase.HOST,
-            user=UsersDatabase.USER,
-            password=UsersDatabase.PASSWORD,
-            database=UsersDatabase.DATABASE
-        )
+    @staticmethod
+    def get_user(chat_id):
 
+        MYDB = UsersDatabase.__dbconnect()
         mycursor = MYDB.cursor()
         mycursor.execute(f"SELECT * FROM users WHERE chat_id = {chat_id}")
         myresult = mycursor.fetchall()
@@ -122,7 +105,7 @@ class UsersDatabase:
         for user in myresult:
             user_info = {
                 'CodMatricola': str(user[0]),
-                'Password': int(user[1]),
+                'Password': (user[1]),
                 'Biblioteca': user[2],
                 'Aula': user[3],
                 'user_id': str(user[4])

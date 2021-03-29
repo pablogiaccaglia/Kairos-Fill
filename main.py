@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     # Create the Updater and pass it your bot's token.
-    TOKEN = "1689234893:AAFpmeOiYkaDWcbC3ApLaFRwK6jKHndmBY8"
+    TOKEN = "1689234893:AAG20nDmaxKKM3O5dbj-7Gk5a4FTz1Ht2LU"
 
     bot = SbaBot(TOKEN)
 
