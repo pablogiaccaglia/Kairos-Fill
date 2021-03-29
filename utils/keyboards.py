@@ -5,7 +5,7 @@
 """
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from collections import namedtuple
-import const as c
+from utils import const as c
 
 indiciAulee = namedtuple("indiciAulee", "field1 field2")
 

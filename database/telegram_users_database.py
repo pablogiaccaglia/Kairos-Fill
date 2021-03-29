@@ -30,14 +30,13 @@ class UsersDatabase:
         users = []
 
         for user in myresult:
-            user_dict = {}
-            user_dict['Nome'] = (user[0])
-            user_dict['Mail'] = user[1]
-            user_dict['CodMatricola'] = str(user[2])
-            user_dict['Telefono'] = int(user[3])
-            user_dict['Biblioteca'] = user[4]
-            user_dict['Aula'] = user[5]
-            user_dict['user_id'] = str(user[6])
+            user_dict = {
+                'CodMatricola': str(user[2]),
+                'Password': int(user[3]),
+                'Biblioteca': user[4],
+                'Aula': user[5],
+                'user_id': str(user[6])
+                         }
             users.append(user_dict)
 
         mycursor.close()
@@ -45,15 +44,15 @@ class UsersDatabase:
 
         return users
 
-    def add_user(self, name, mail, student_id, phone, library, hall, user_id):
+    def add_user(self, student_id, password, library, hall, user_id):
         MYDB = mysql.connector.connect(
             host=UsersDatabase.HOST,
             user=UsersDatabase.USER,
             password=UsersDatabase.PASSWORD,
             database=UsersDatabase.DATABASE
         )
-        sql = "INSERT INTO users (Nome, Mail, CodMatricola, Telefono, Biblioteca, Aula, chat_id) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-        val = (self, name, mail, student_id, phone, library, hall, user_id)
+        sql = "INSERT INTO users (CodMatricola, Password, Biblioteca, Aula, chat_id) VALUES (%s,%s,%s,%s,%s)"
+        val = (self, student_id, password, library, hall, user_id)
         mycursor = MYDB.cursor()
         mycursor.execute(sql, val)
         MYDB.commit()
@@ -121,14 +120,13 @@ class UsersDatabase:
         user_info_dict = []
 
         for user in myresult:
-            user_info = {}
-            user_info['Nome'] = user[0]
-            user_info['Mail'] = user[1]
-            user_info['CodMatricola'] = str(user[2])
-            user_info['Telefono'] = int(user[3])
-            user_info['Biblioteca'] = user[4]
-            user_info['Aula'] = user[5]
-            user_info['user_id'] = str(user[6])
+            user_info = {
+                'CodMatricola': str(user[0]),
+                'Password': int(user[1]),
+                'Biblioteca': user[2],
+                'Aula': user[3],
+                'user_id': str(user[4])
+            }
             user_info_dict.append(user_info)
 
         return user_info_dict

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     # Create the Updater and pass it your bot's token.
-    TOKEN = "your token here"
+    TOKEN = "1689234893:AAFpmeOiYkaDWcbC3ApLaFRwK6jKHndmBY8"
 
     bot = SbaBot(TOKEN)
 
@@ -71,10 +71,8 @@ def main():
         entry_points=[CallbackQueryHandler(bot.hall_confirmation, pattern='[0-9]+$')],
 
         states={
-            c.COLLECT_NAME: [CallbackQueryHandler(bot.ask_for_name, pattern='^' + str(c.CONFIRM_HALL) + '$')],
-            c.COLLECT_EMAIL: [MessageHandler(Filters.text & ~Filters.command, bot.ask_for_email)],
-            c.COLLECT_ID: [MessageHandler(Filters.text & ~Filters.command, bot.ask_for_id)],
-            c.COLLECT_PHONE: [MessageHandler(Filters.text & ~Filters.command, bot.ask_for_phone)],
+            c.COLLECT_ID: [CallbackQueryHandler(bot.ask_for_id, pattern='^' + str(c.CONFIRM_HALL) + '$')],
+            c.COLLECT_PASSWORD: [MessageHandler(Filters.text & ~Filters.command, bot.ask_for_password)],
             c.DATA_CONFIRMATION: [MessageHandler(Filters.text & ~Filters.command, bot.confirm_data)],
             c.ADD_USER_TO_DATABASE: [add_user_to_database],
             c.BOOKING_CONFIRMATION: [CallbackQueryHandler(bot.reserve_seat, pattern='^' + str(c.BOOK) + '$')],
@@ -84,7 +82,6 @@ def main():
             CallbackQueryHandler(bot.autofiller_options, pattern='^' + str(c.SUB_MENU) + '$'),
             # CallbackQueryHandler(bot.autofiller_options, pattern='^' + str(c.RESTART) + '$'),
             CallbackQueryHandler(bot.ask_for_hall, pattern='^' + str(c.CHANGE_HALL) + '$'),
-            CallbackQueryHandler(bot.ask_for_name, pattern='^' + str(c.CONFIRM_HALL) + '$'),
             CommandHandler('stop', bot.stop_nested),
         ],
         map_to_parent={

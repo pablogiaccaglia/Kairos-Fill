@@ -14,12 +14,12 @@ from telegram.bot import Bot
 import time
 
 # From Package
+from database.telegram_users_database import UsersDatabase
 from utils import keyboards
 from utils import date_parser
 from utils import mail_checker
 from utils import const as c
 from fillscripts import single_booking
-from database import telegram_users_database
 
 
 class SbaBot:
@@ -138,75 +138,44 @@ class SbaBot:
         text = f"Aula scelta : {hall}\nOra ti chiederò alcune informazioni personali🛂, fammi sapere se hai cambiato idea!"
         self.__editMessage(update, text, keyboard)
 
-        return c.COLLECT_NAME
-
-    def ask_for_name(self, update: Update, context: CallbackContext) -> None:
-
-        text = "Inserisci il tuo nome e cognome ✏:"
-        self.__editMessage(update, text)
-        # next state in conversation
-        return c.COLLECT_EMAIL
-
-    def ask_for_email(self, update: Update, context: CallbackContext) -> None:
-
-        context.user_data[c.NAME] = update.message.text
-        text = "Scrivimi la tua mail✉"
-
-        self.__deleteLastMessages(context, update)
-        self.__sendMessage(context, text)
-
         return c.COLLECT_ID
 
     def ask_for_id(self, update: Update, context: CallbackContext) -> None:
 
+        text = "Inserisci la tua matricola 📇:"
+        self.__editMessage(update, text)
+
+        # next state in conversation
+        return c.COLLECT_PASSWORD
+
+    def ask_for_password(self, update: Update, context: CallbackContext) -> None:
         self.__deleteLastMessages(context, update)
 
-        if mail_checker.email_validator(update.message.text):
-
-            context.user_data[c.MAIL] = update.message.text
-
-            text = "Scrivimi il tuo codice matricola🔢"
+        if self.__check_id(update.message.text):
+            context.user_data[c.ID] = int(update.message.text)
+            text = "Scrivimi la tua password 🔐"
             self.__sendMessage(context, text)
-
-            return c.COLLECT_PHONE
+            return c.DATA_CONFIRMATION
 
         else:
-
-            text = "Mail non valida! 🥴\n✉Riprova✉"
+            text = "Codice Matricola non valido! 🥴\nScrivimi il tuo codice matricola🔢"
             self.__sendMessage(context, text)
+            return c.COLLECT_PASSWORD
 
-            return c.COLLECT_ID
-
-    def ask_for_phone(self, update: Update, context: CallbackContext) -> None:
-
-        self.__deleteLastMessages(context, update)
-
+    def __check_id(self, id):
         try:
-            matricola = int(update.message.text)
-
-            if 5000000 <= matricola < 8000000:
-                context.user_data[c.ID] = matricola
-
-                text = "Scrivimi il tuo numero di telefono📞"
-                self.__sendMessage(context, text)
-
-                # next state in conversation
-                return c.DATA_CONFIRMATION
-
+            if 5000000 <= int(id) < 8000000:
+                return True
             else:
                 raise Exception
 
-        except:
-
-            text = "Codice Matricola non valido! 🥴\nScrivimi il tuo codice matricola🔢"
-            self.__sendMessage(context, text)
-
-            return c.COLLECT_PHONE
+        except Exception:
+            return False
 
     def confirm_data(self, update: Update, context: CallbackContext) -> None:
 
         self.__deleteLastMessages(context, update)
-        context.user_data[c.PHONE] = update.message.text
+        context.user_data[c.PW] = update.message.text
 
         msg = """Ecco i tuoi dati, sono giusti?
 
@@ -214,14 +183,12 @@ class SbaBot:
 ✍Aula: {}
 ✍Mese: {}
 ✍Giorno: {}
-✍Nome e Cognome: {}
 ✍Matricola: {}
-✍Mail: {}
-✍Telefono: {}
+✍Password: {}
 
 "Dimmi cosa fare👇""".format(context.user_data[c.LIBRARY], context.user_data[c.HALL], context.user_data[c.MONTH],
-                             context.user_data[c.DAY], context.user_data[c.NAME], context.user_data[c.ID],
-                             context.user_data[c.MAIL], context.user_data[c.PHONE])
+                             context.user_data[c.DAY], context.user_data[c.ID],
+                             context.user_data[c.PW])
 
         if context.user_data[c.NEW_USER] > 0:
             keyboard = keyboards.subConfirmationKeyboard
@@ -234,16 +201,14 @@ class SbaBot:
 
     def update_database(self, update: Update, context: CallbackContext) -> None:
 
-        users = telegram_users_database.UsersDatabase.get_users()
+        users = UsersDatabase.get_users()
         user_id = [i['user_id'] for i in users]
         students_ids = [j['CodMatricola'] for j in users]
         user_flag = context.user_data[c.NEW_USER]
 
         chat_id = str(context.user_data[c.CHAT_ID])
-        name = context.user_data[c.NAME]
-        email = context.user_data[c.MAIL]
         student_id = str(context.user_data[c.ID])
-        phone = context.user_data[c.PHONE]
+        password = context.user_data[c.PW]
         library = context.user_data[c.LIBRARY]
         hall = context.user_data[c.HALL]
 
@@ -261,19 +226,19 @@ class SbaBot:
             # modify user data in sss
             if chat_id in user_id and user_flag == 2 and student_id in students_ids:
                 UsersDatabase.delete_user(student_id)
-                UsersDatabase.add_user(name, email, student_id, phone, library, hall, chat_id)
+                UsersDatabase.add_user(student_id, password, library, hall, chat_id)
 
                 text = "Registrazione completata ✔️i dati sono stati modificati correttamente, alle 00:00 avverà la prima prenotazione!"
 
             # user requests to modify data but it's unregistered
             if (chat_id not in user_id or student_id not in students_ids) and user_flag == 2:
-                UsersDatabase.add_user(name, email, student_id, phone, library, hall, chat_id)
+                UsersDatabase.add_user(student_id, password, library, hall, chat_id)
 
                 text = "Non eri iscritto! Non ti preoccupare, registrazione completata ✔️alle 00:00 avverà la prima prenotazione!"
 
             # new user in sss
             if student_id not in students_ids and user_flag == 1:
-                UsersDatabase.add_user(name, email, student_id, phone, library, hall, chat_id)
+                UsersDatabase.add_user(student_id, password, library, hall, chat_id)
 
                 text = "Registrazione completata ✔️alle 00:00 avverà la prima prenotazione!"
 
@@ -287,17 +252,15 @@ class SbaBot:
         students_ids = [i['CodMatricola'] for i in users]
 
         chat_id = str(context.user_data[c.CHAT_ID])
-        name = context.user_data[c.NAME]
-        email = context.user_data[c.MAIL]
         student_id = str(context.user_data[c.ID])
-        phone = context.user_data[c.PHONE]
+        password = context.user_data[c.PW]
         library = context.user_data[c.LIBRARY]
         hall = context.user_data[c.HALL]
 
         if student_id in students_ids:
             UsersDatabase.delete_user(student_id)
 
-        UsersDatabase.add_user(name, email, student_id, phone, library, hall, chat_id)
+        UsersDatabase.add_user(student_id, password, library, hall, chat_id)
 
         text = "Registrazione completata 🤙 \n Ho modificato i tuoi dati ✔️alle 00:00 avverà la prima prenotazione!"
         keyboard = keyboards.completedActionKeyboard
@@ -341,16 +304,14 @@ class SbaBot:
         text = "🎛Sto prenotando..🎛"
         self.__editMessage(update, text)
 
-        name = context.user_data[c.NAME]
-        email = context.user_data[c.MAIL]
         student_id = context.user_data[c.ID]
-        phone = context.user_data[c.PHONE]
+        password = context.user_data[c.PW]
         library = context.user_data[c.LIBRARY]
         hall = context.user_data[c.HALL]
         day = context.user_data[c.DAY]
         month = context.user_data[c.MONTH]
 
-        val = single_booking.fillerUserData(library, hall, day, month, name, email, student_id, phone)
+        val = single_booking.fillerUserData(library, hall, day, month, student_id, password)
 
         keyboard = keyboards.completedActionKeyboard
 
@@ -378,15 +339,12 @@ class SbaBot:
         text = "Ecco i tuoi dati: \n\n"
 
         for sub in user_info:
-            msg = """⚈Nome: {}
-⚈Matricola: {}
-⚈Mail: {}
-⚈Telefono: {}
+            msg = """⚈Matricola: {}
+⚈Password: {}
 ⚈Biblioteca: {}
 ⚈Aula: {}
 ---------------------------------------
-""".format(sub["Nome"], sub["CodMatricola"], sub["Mail"],
-           sub["Telefono"], sub["Biblioteca"], sub["Aula"])
+""".format(sub["CodMatricola"], sub["Password"], sub["Biblioteca"], sub["Aula"])
             text = text + msg
 
         keyboard = keyboards.completedActionKeyboard
@@ -459,7 +417,7 @@ class SbaBot:
 
         str1 = "*Ciao {} 👋*\n".format(username)
         str2 = """
-Con questo bot è possibile prenotare un posto della Biblioteca Umanistica📚 in modo più rapido del portale SBA e con qualche opzione aggiuntiva, come il poter sapere in pochi secondi i posti disponibili in tutta la biblioteca 😉
+Con questo bot è possibile prenotare un posto della Biblioteca Umanistica📚 in modo automatico 
 
 I comandi sono estremamente semplici ed intuitivi 😎
 
@@ -485,19 +443,11 @@ Una volta cliccato *Prenota* potrai utilizzare i seguenti bottoni :
 
 🔬 *Scelta aula* - Cliccami per selezionare l'aula
 
-📊 *Disponibilità aulee* - Posti liberi in ogni aula⛔IN MANUTENZIONE⛔
-
 📴 *Arresta Bot* - Cliccami per arrestare il bot, /start per riavviarlo
-
-
-⛔IN MANUTENZIONE⛔
-📋*Disponibilità aulee*📋
-Con questo bot è possibile visualizzare i posti disponibili in ogni aula, questo ti permetterà di risparmiare molto tempo quando sei in cerca di un posto all'ultimo minuto!✌ Tuttavia ottenere tutti questi dati può risultare molto fatiscoso, per questo ti chiedo di essere paziente se non dovessi risponderti immediatamente😔
-
 
 💡*About me*💡
 Questo bot è basato sui dati dell' [SBA](https://www.sbafirenze.it/tools/)
-Se hai bisogno, [contattarmi](https://t.me/pepsikoya)
+Se hai bisogno, [contattarmi](https://t.me/pepsikoi)
             """
 
         return str1 + str2
