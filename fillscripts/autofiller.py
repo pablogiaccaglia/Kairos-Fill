@@ -1,28 +1,20 @@
 # -*- coding: utf-8 -*-
-from nightFiller import fillerUserData
+from nightFiller import KairosBot
 from database.telegram_users_database import UsersDatabase
-from utils import date_update
-from apscheduler.schedulers.blocking import BlockingScheduler
-
-sched = BlockingScheduler()
 
 
-@sched.scheduled_job('cron', day_of_week='mon-fri', hour=17)
+# sched = BlockingScheduler()
+
 def autofiller():
-    # date_update.dateUpdater()
-    # date = UsersDatabase.get_date()
     users = UsersDatabase.get_users()
-    #    flag = date[2]
-    # row = date[3]
-    # column = date[4]
-    row = 6
-    column = 3
+    print(users)
+    kairos = KairosBot()
+
     for user in users:
-        print("ciao")
-        fillerUserData(user['student_id'], user['user_pw'], user['library'], user['hall'], row, column)
-
-
+        print(user['student_id'] + " " + user['user_pw'])
+        kairos.fillerUserData(user['student_id'], user['user_pw'], user['library'], user['hall'])
+        kairos.resetBot()
 
 
 if __name__ == '__main__':
-    sched.start()
+    autofiller()

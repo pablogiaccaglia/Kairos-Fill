@@ -17,7 +17,6 @@ class UsersDatabase:
     PASSWORD = "171742fdd917757f31c2eed21580bd8008e142e0a07ef64d26bc3b01166a9761"
     DATABASE = "d2ka7f1q4au9tm"
 
-
     @staticmethod
     def __dbconnect():
         MYDB = psycopg2.connect(

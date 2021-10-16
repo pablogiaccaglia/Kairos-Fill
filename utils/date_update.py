@@ -11,14 +11,16 @@ def dateUpdater():
     month = today.month
     num = today.weekday()
     flag = 1
-    row = ((dayToBook - 1) // 7) + 1
-    column = dayToBook - 7 * (row - 1)
+    row = ((dayToBook - 1) // 7) + 2
+    column = dayToBook - 7 * (row - 2)
+
+    print(row)
+    print(column)
 
     if num == 4 or num == 5:
         flag = 0
 
-#    telegram_users_database.UsersDatabase.add_date(day, month, flag, row, column)
-    print("done")
 
-
-dateUpdater()
+if __name__ == '__main__':
+    dateUpdater()
+# dateUpdater()
