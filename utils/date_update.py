@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # !/home/michaelfareshi/.virtualenvs/myvenv/bin/python3.8
 from datetime import datetime
-from database import telegram_users_database
+from database import users_database
 
 
 def dateUpdater():

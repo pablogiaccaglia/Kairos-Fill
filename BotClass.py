@@ -6,20 +6,20 @@
 
 ### MODULES
 
-# From env
-from telegram import ParseMode, Update
-from telegram.ext import Updater, CallbackContext
-from telegram_bot_calendar import DetailedTelegramCalendar
-from telegram.bot import Bot
 import time
 
+# From env
+from telegram import ParseMode, Update
+from telegram.bot import Bot
+from telegram.ext import Updater, CallbackContext
+from telegram_bot_calendar import DetailedTelegramCalendar
+
 # From Package
-from database.telegram_users_database import UsersDatabase
-from utils import keyboards
-from utils import date_parser
-from utils import mail_checker
-from utils import const as c
+from database.users_database import UsersDatabase
 from fillscripts import single_booking
+from utils import const as c
+from utils import date_parser
+from utils import keyboards
 
 
 class SbaBot:
