@@ -170,7 +170,5 @@ if __name__ == '__main__':
     users = db.get_users()
     usersSorted = sorted(users, key = lambda k: k['hall'])
     for user in usersSorted:
-        print(user['student_id'] + ": " + user["user_pw"] + ' | ' + user['library'] + " -> " + user['hall'] + " | " + user['secondary_hall'])
-#  db.delete_user(7050361)
-# db.add_user(7076088, "Balotelli01!",  "Biblioteca di Lettere", "Biblioteca di Lettere - Sala italianistica e spettacolo",  111111111)
-
+        print(user['student_id'] + ": " + user["user_pw"] + ' | ' + user['library'] + " -> " + user['hall'] + " | " +
+              user['secondary_hall'])

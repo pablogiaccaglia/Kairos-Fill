@@ -1,5 +1,7 @@
 #!/home/michaelfareshi/.virtualenvs/myvenv/bin/python3.8
 # -*- coding: utf-8 -*-
+import re
+
 from email_validator import validate_email, EmailNotValidError
 
 

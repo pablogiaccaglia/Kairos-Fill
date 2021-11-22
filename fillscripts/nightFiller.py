@@ -1,3 +1,5 @@
+import re
+
 from selenium.webdriver.support.select import Select
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -17,70 +19,76 @@ class KairosBot:
         self.driverPath = Path("../chromedriver")
 
         self.chrome_options = self.__configChromeOptions()
-        self.driver = webdriver.Chrome(executable_path = Path.resolve(self.driverPath),
-                                       options = self.chrome_options)
+        self.driver = webdriver.Chrome(executable_path = Path.resolve(self.driverPath), options = self.chrome_options)
 
         self.SINGLE_BOOK = "SINGLE_BOOK"
         self.DOUBLE_BOOK = "DOUBLE_BOOK"
         self.OPTION_1 = "Posto studio in biblioteca [MATTINA]"
         self.OPTION_2 = "Posto studio in biblioteca [POMERIGGIO]"
         self.MAX_RETRIES = 2
-        self.MAX_WAITING_TIME = 10
+        self.MAX_WAITING_TIME = 5
         self.LOGIN_URL = "https://kairos.unifi.it/portalePlanning/BIBL/login.php"
         self.BOOKING_URL = "https://kairos.unifi.it/portalePlanning/BIBL/index.php?include=form"
 
         self.completed = False
 
-    def resetBot(self):
+    def __resetBot(self):
         if not str(self.driver).__contains__("null"):
             self.driver.quit()
         self.__init__()
 
     def start(self, bookingType):
+        users = UsersDatabase.get_users()
 
         if bookingType == self.SINGLE_BOOK:
-            self.__singleBook(self.OPTION_1)
+            for user in users:
+                self.__singleBook(self.OPTION_1, user)
 
         elif bookingType == self.DOUBLE_BOOK:
-            self.__singleBook(self.OPTION_1)
-            self.driver.get(self.BOOKING_URL)
-            self.__singleBook(self.OPTION_2)
+            for user in users:
+                self.__singleBook(self.OPTION_1, user)
+                self.driver.get(self.BOOKING_URL)
+                self.__singleBook(self.OPTION_2, user)
 
-    def __singleBook(self, option):
+    def __singleBook(self, option, user):
 
-        users = UsersDatabase.get_users()
         self.completed = False
+        print(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
 
-        for user in users:
-            print(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
+        self.__tryBooking(user, 'hall', option)
+        booked_hall = user['hall']
 
-            self.__tryBooking(user, 'hall', option)
-            booked_hall = user['hall']
+        print(self.completed)
 
-            if self.completed is False:
-                try:
-                    self.__tryBooking(user, 'secondary_hall', option)
-                    booked_hall = user['secondary_hall']
+        if self.completed is False:
+            try:
+                self.__tryBooking(user, 'secondary_hall', option)
+                booked_hall = user['secondary_hall']
 
-                except Exception as e:
-                    print("Errore di prenotazione per " + user['student_id'] + " | causa : " + str(e))
-                    self.completed = False
+            except Exception as e:
+                print("Errore di prenotazione per " + user['student_id'] + " | causa : " + str(e))
+                self.completed = False
 
-            if self.completed is True:
-                print("Prenotato : " + self.OPTION_1 + " | " + booked_hall + " | " + user['student_id'])
+        if self.completed is True:
+            print("Prenotato : " + self.OPTION_1 + " | " + booked_hall + " | " + user['student_id'])
+        else:
+
+            print("Non prenotato il turno della " + (re.search("\[(.*?)\]", option).group(1)).lower())
 
     def __tryBooking(self, user, hall, option):
 
+        self.__resetBot()
         self.__goToBookingPage(user['student_id'], user['user_pw'])
+
         for i in range(self.MAX_RETRIES):
             try:
-                self.__book(user['library'], user[hall], option)
-                self.resetBot()
-                self.completed = True
+                self.completed = self.__book(user['library'], user[hall], option)
+                print(self.completed)
                 break
             except Exception as e:
-                print("Tentativo " + str(i+1) + " | Errore di prenotazione :  " + str(e))
+                print("Tentativo " + str(i + 1) + " fallito " + " - " + option + " - " + hall + " | " + user[hall] + " | Errore di prenotazione :  " + str(e))
                 self.driver.get(self.BOOKING_URL)
+
 
     def __configChromeOptions(self):
 
@@ -97,35 +105,41 @@ class KairosBot:
 
         # xpath corrispondenti ai campi da riempire e ai box da selezionare (spunta gdpr e box "INVIA")
         userNameXPath = '//*[@id="username"]'
-        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(EC.visibility_of_element_located((By.XPATH, userNameXPath)))
+        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(
+                EC.visibility_of_element_located((By.XPATH, userNameXPath)))
         userNameWebElement = self.driver.find_element(by = By.XPATH, value = userNameXPath)
 
         passwordXPath = '//*[@id="password"]'
-        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(EC.visibility_of_element_located((By.XPATH, passwordXPath)))
+        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(
+                EC.visibility_of_element_located((By.XPATH, passwordXPath)))
         passwordWebElement = self.driver.find_element(by = By.XPATH, value = passwordXPath)
 
         self.__fillData(userNameWebElement, user_id)
         self.__fillData(passwordWebElement, user_pw)
 
         gdprBoxXPath = '//*[@id="fm1"]/div[3]/button'
-        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(EC.visibility_of_element_located((By.XPATH, gdprBoxXPath)))
+        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(
+                EC.visibility_of_element_located((By.XPATH, gdprBoxXPath)))
         self.__clickOnButton(gdprBoxXPath)
 
         # little trick to handle possible loading errors
         self.driver.get(self.LOGIN_URL)
 
         inviaButtonXPath = '//*[@id="form"]/div'
-        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(EC.visibility_of_element_located((By.XPATH, inviaButtonXPath)))
+        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(
+                EC.visibility_of_element_located((By.XPATH, inviaButtonXPath)))
         self.__clickOnButton(inviaButtonXPath)
 
         servizioGeneralXPath = "//select[@name = 'raggruppamento_servizi']"
-        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(EC.visibility_of_element_located((By.XPATH, servizioGeneralXPath)))
+        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(
+                EC.visibility_of_element_located((By.XPATH, servizioGeneralXPath)))
         self.__selectFromDropdown(servizioGeneralXPath, "Servizi bibliotecari")
 
     def __book(self, library, hall, option = "Posto studio in biblioteca [MATTINA]"):
 
         servizioXPath = "//select[@name = 'servizio']"
-        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(EC.visibility_of_element_located((By.XPATH, servizioXPath)))
+        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(
+                EC.visibility_of_element_located((By.XPATH, servizioXPath)))
         self.__selectFromDropdown(servizioXPath, option)
 
         # get all options text
@@ -135,12 +149,14 @@ class KairosBot:
             pass """
 
         bibliotecheSelectionXPath = "//select[@name = 'raggruppamento_aree']"
-        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(EC.visibility_of_element_located((By.XPATH, bibliotecheSelectionXPath)))
+        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(
+                EC.visibility_of_element_located((By.XPATH, bibliotecheSelectionXPath)))
         self.__selectFromDropdown(bibliotecheSelectionXPath, library)
         self.__selectFromDropdown("//select[@name = 'area']", hall)
 
         calendarSelectionXPath = '// *[ @ id = "data_inizio-form"]'
-        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(EC.visibility_of_element_located((By.XPATH, calendarSelectionXPath)))
+        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(
+                EC.visibility_of_element_located((By.XPATH, calendarSelectionXPath)))
         self.__clickOnButton(calendarSelectionXPath)
 
         datepicker = self.driver.find_element(By.CLASS_NAME, value = "datepicker-days")
@@ -165,18 +181,21 @@ class KairosBot:
         dateToSelect.click()
 
         verifyButtonXPath = '// *[ @ id = "verify"]'
-        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(EC.visibility_of_element_located((By.XPATH, verifyButtonXPath)))
+        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(
+                EC.visibility_of_element_located((By.XPATH, verifyButtonXPath)))
         self.__clickOnButton(verifyButtonXPath)
 
-        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(EC.visibility_of_element_located((By.CLASS_NAME, "slot_available ")))
+        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, "slot_available ")))
         confirmButtonElement = self.driver.find_element(by = By.CLASS_NAME, value = "slot_available ")
         confirmButtonElement.click()
 
         confermaButtonXPath = '//*[@id="conferma"]'
-        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(EC.visibility_of_element_located((By.XPATH, confermaButtonXPath)))
+        WebDriverWait(self.driver, self.MAX_WAITING_TIME).until(
+                EC.visibility_of_element_located((By.XPATH, confermaButtonXPath)))
         self.__clickOnButton(confermaButtonXPath)
 
-
+        return True
 
     def __clickOnButton(self, path):
         button = self.driver.find_element(by = By.XPATH, value = path)
