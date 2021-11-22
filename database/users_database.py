@@ -39,11 +39,11 @@ class UsersDatabase:
 
         for user in myresult:
             user_dict = {
-                'student_id': str(user[0]),
-                'user_pw':    (user[1]),
-                'library':    user[2],
-                'hall':       user[3],
-                'user_id':    str(user[4]),
+                'student_id':     str(user[0]),
+                'user_pw':        (user[1]),
+                'library':        user[2],
+                'hall':           user[3],
+                'user_id':        str(user[4]),
                 'secondary_hall': str(user[5])
             }
             users.append(user_dict)
@@ -54,10 +54,10 @@ class UsersDatabase:
         return users
 
     @staticmethod
-    def add_user(student_id, password, library, hall, user_id):
+    def add_user(student_id, password, library, hall, secondary_hall, user_id):
 
-        query = "INSERT INTO users (user_id, user_pw, library, hall, chat_id) VALUES (%s,%s,%s,%s,%s)"
-        val = (student_id, password, library, hall, user_id)
+        query = "INSERT INTO users (user_id, user_pw, library, hall, secondary_hall, chat_id) VALUES (%s,%s,%s,%s,%s, %s)"
+        val = (student_id, password, library, hall, secondary_hall, user_id)
         MYDB = UsersDatabase.__dbconnect()
         mycursor = MYDB.cursor()
         mycursor.execute(query, val)
@@ -114,7 +114,7 @@ class UsersDatabase:
         return user_info_dict
 
     def add_secondary_hall_option_to_all(self):
-      #  UsersDatabase.add_column_to_users_table("secondary_hall", "VARCHAR(64)")
+        #  UsersDatabase.add_column_to_users_table("secondary_hall", "VARCHAR(64)")
         users = db.get_users()
         MYDB = UsersDatabase.__dbconnect()
 
