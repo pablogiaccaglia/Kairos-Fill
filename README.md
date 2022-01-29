@@ -1,7 +1,9 @@
 # Kairos Autofill 
 
 <a href="link" style="text-align: center">
+<p align="center">
 <img src="https://user-images.githubusercontent.com/73782244/112765278-be33b880-900c-11eb-90a1-7e23ee013f7a.png" width="250" height="200" align="center"></a>
+</p>
 
 #### Telegram Bot for doing cool things inside Kairos Platform
 Telegram bot to automatically reserve college libraries' seats through 
