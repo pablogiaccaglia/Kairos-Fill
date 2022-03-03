@@ -39,6 +39,7 @@ class KairosBot:
         self.__init__()
 
     def start(self, bookingType):
+        print("ciaoooo")
         users = UsersDatabase.get_users()
 
         if bookingType == self.SINGLE_BOOK:
