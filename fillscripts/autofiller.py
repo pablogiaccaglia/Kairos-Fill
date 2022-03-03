@@ -9,7 +9,8 @@ from nightFiller import KairosBot
 
 def autofiller():
     kairos = KairosBot()
-    kairos.start(kairos.DOUBLE_BOOK)
+    kairos.start(bookingType = kairos.DOUBLE_BOOK)
+
 
 # schedule.every().day.at("00:01").do(autofiller)
 
@@ -18,4 +19,7 @@ if __name__ == '__main__':
     #     schedule.run_pending()
     #  print("hello")
     #     time.sleep(1)
+    start_time = time.time()
     autofiller()
+    print("--- %s seconds ---" % (time.time() - start_time))
+

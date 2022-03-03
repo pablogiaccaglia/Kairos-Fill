@@ -5,6 +5,8 @@ Created on
 """
 
 ### MODULES
+import csv
+import json
 import os
 import psycopg2
 
@@ -164,6 +166,12 @@ class UsersDatabase:
         mycursor.close()
         MYDB.close()
 
+    def dump_users_table(self):
+        usersDict = sorted(self.get_users(), key = lambda k: k['hall'])
+        jsonfile = open("users.json", 'w')
+        data = json.dumps(usersDict, indent = 4)
+        jsonfile.write(data)
+
 
 if __name__ == '__main__':
     db = UsersDatabase()
@@ -172,3 +180,7 @@ if __name__ == '__main__':
     for user in usersSorted:
         print(user['student_id'] + ": " + user["user_pw"] + ' | ' + user['library'] + " -> " + user['hall'] + " | " +
               user['secondary_hall'])
+
+    # db.add_user(7014406, "MikeAbloh99*", "Biblioteca di Lettere","Biblioteca di Lettere - Sala filosofia 1", "Biblioteca di Lettere - Sala filosofia 2", 11111111)
+   # db.delete_user(7057554)
+   # db.delete_user(7028112)

@@ -12,6 +12,8 @@ from pathlib import Path
 from database.users_database import UsersDatabase
 
 
+# active day , new day, day
+
 class KairosBot:
 
     def __init__(self):
@@ -26,7 +28,7 @@ class KairosBot:
         self.OPTION_1 = "Posto studio in biblioteca [MATTINA]"
         self.OPTION_2 = "Posto studio in biblioteca [POMERIGGIO]"
         self.MAX_RETRIES = 2
-        self.MAX_WAITING_TIME = 5
+        self.MAX_WAITING_TIME = 10
         self.LOGIN_URL = "https://kairos.unifi.it/portalePlanning/BIBL/login.php"
         self.BOOKING_URL = "https://kairos.unifi.it/portalePlanning/BIBL/index.php?include=form"
 
@@ -42,10 +44,12 @@ class KairosBot:
 
         if bookingType == self.SINGLE_BOOK:
             for user in users:
+                print(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
                 self.__singleBook(self.OPTION_1, user)
 
         elif bookingType == self.DOUBLE_BOOK:
             for user in users:
+                print(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
                 self.__singleBook(self.OPTION_1, user)
                 self.driver.get(self.BOOKING_URL)
                 self.__singleBook(self.OPTION_2, user)
@@ -53,12 +57,9 @@ class KairosBot:
     def __singleBook(self, option, user):
 
         self.completed = False
-        print(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
 
         self.__tryBooking(user, 'hall', option)
         booked_hall = user['hall']
-
-        print(self.completed)
 
         if self.completed is False:
             try:
@@ -70,7 +71,7 @@ class KairosBot:
                 self.completed = False
 
         if self.completed is True:
-            print("Prenotato : " + self.OPTION_1 + " | " + booked_hall + " | " + user['student_id'])
+            print("Prenotato : " + option + " | " + booked_hall + " | " + user['student_id'])
         else:
 
             print("Non prenotato il turno della " + (re.search("\[(.*?)\]", option).group(1)).lower())
@@ -83,12 +84,11 @@ class KairosBot:
         for i in range(self.MAX_RETRIES):
             try:
                 self.completed = self.__book(user['library'], user[hall], option)
-                print(self.completed)
                 break
             except Exception as e:
-                print("Tentativo " + str(i + 1) + " fallito " + " - " + option + " - " + hall + " | " + user[hall] + " | Errore di prenotazione :  " + str(e))
+                print("Tentativo " + str(i + 1) + " fallito " + " - " + option + " - " + hall + " | " + user[
+                    hall] + " | Errore di prenotazione :  " + str(e))
                 self.driver.get(self.BOOKING_URL)
-
 
     def __configChromeOptions(self):
 
@@ -214,3 +214,8 @@ class KairosBot:
             .key_up(Keys.CONTROL) \
             .send_keys(data) \
             .perform()
+
+
+if __name__ == '__main__':
+    a = (i * 0 for i in range(5) if i < 1)
+    print(next(a))
