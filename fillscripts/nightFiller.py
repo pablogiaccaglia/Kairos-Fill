@@ -8,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 import selenium.webdriver.support.expected_conditions as EC
 from pathlib import Path
+import logging
 
 from database.users_database import UsersDatabase
 
@@ -44,12 +45,12 @@ class KairosBot:
 
         if bookingType == self.SINGLE_BOOK:
             for user in users:
-                print(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
+                logging.info(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
                 self.__singleBook(self.OPTION_1, user)
 
         elif bookingType == self.DOUBLE_BOOK:
             for user in users:
-                print(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
+                logging.info(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
                 self.__singleBook(self.OPTION_1, user)
                 self.driver.get(self.BOOKING_URL)
                 self.__singleBook(self.OPTION_2, user)
@@ -67,14 +68,14 @@ class KairosBot:
                 booked_hall = user['secondary_hall']
 
             except Exception as e:
-                print("Errore di prenotazione per " + user['student_id'] + " | causa : " + str(e))
+                logging.info("Errore di prenotazione per " + user['student_id'] + " | causa : " + str(e))
                 self.completed = False
 
         if self.completed is True:
-            print("Prenotato : " + option + " | " + booked_hall + " | " + user['student_id'])
+            logging.info("Prenotato : " + option + " | " + booked_hall + " | " + user['student_id'])
         else:
 
-            print("Non prenotato il turno della " + (re.search("\[(.*?)\]", option).group(1)).lower())
+            logging.info("Non prenotato il turno della " + (re.search("\[(.*?)\]", option).group(1)).lower())
 
     def __tryBooking(self, user, hall, option):
 
@@ -86,7 +87,7 @@ class KairosBot:
                 self.completed = self.__book(user['library'], user[hall], option)
                 break
             except Exception as e:
-                print("Tentativo " + str(i + 1) + " fallito " + " - " + option + " - " + hall + " | " + user[
+                logging.info("Tentativo " + str(i + 1) + " fallito " + " - " + option + " - " + hall + " | " + user[
                     hall] + " | Errore di prenotazione :  " + str(e))
                 self.driver.get(self.BOOKING_URL)
 
@@ -145,7 +146,7 @@ class KairosBot:
         # get all options text
         """ selections = Select(driver.find_element_by_xpath('// *[ @ id = "area"]'))
         for option in selections.options:
-            # print(option.text)
+            # logging.info(option.text)
             pass """
 
         bibliotecheSelectionXPath = "//select[@name = 'raggruppamento_aree']"
@@ -218,4 +219,4 @@ class KairosBot:
 
 if __name__ == '__main__':
     a = (i * 0 for i in range(5) if i < 1)
-    print(next(a))
+    logging.info(next(a))

@@ -1,25 +1,17 @@
 # -*- coding: utf-8 -*-
 import time
-import schedule as schedule
 
 from nightFiller import KairosBot
+import logging
 
-
-# sched = BlockingScheduler()
 
 def autofiller():
     kairos = KairosBot()
     kairos.start(bookingType = kairos.DOUBLE_BOOK)
 
 
-# schedule.every().day.at("00:01").do(autofiller)
-
 if __name__ == '__main__':
-    # while True:
-    #     schedule.run_pending()
-    #  print("hello")
-    #     time.sleep(1)
+    logging.basicConfig(format = '%(process)d-%(levelname)s-%(message)s')
     start_time = time.time()
     autofiller()
-    print("--- %s seconds ---" % (time.time() - start_time))
-
+    logging.info("--- %s seconds ---" % (time.time() - start_time))
