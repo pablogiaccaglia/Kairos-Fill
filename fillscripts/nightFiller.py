@@ -1,3 +1,4 @@
+import os
 import re
 
 from selenium.webdriver.support.select import Select
@@ -7,22 +8,18 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 import selenium.webdriver.support.expected_conditions as EC
-from pathlib import Path
 import logging
 
 from database.users_database import UsersDatabase
-
-
-# active day , new day, day
 
 class KairosBot:
 
     def __init__(self):
 
-        self.driverPath = Path("../chromedriver")
+        self.driverPath = os.environ.get("CHROMEDRIVER_PATH")
 
         self.chrome_options = self.__configChromeOptions()
-        self.driver = webdriver.Chrome(executable_path = Path.resolve(self.driverPath), options = self.chrome_options)
+        self.driver = webdriver.Chrome(executable_path = self.driverPath, options = self.chrome_options)
 
         self.SINGLE_BOOK = "SINGLE_BOOK"
         self.DOUBLE_BOOK = "DOUBLE_BOOK"
@@ -215,8 +212,3 @@ class KairosBot:
             .key_up(Keys.CONTROL) \
             .send_keys(data) \
             .perform()
-
-
-if __name__ == '__main__':
-    a = (i * 0 for i in range(5) if i < 1)
-    logging.info(next(a))
