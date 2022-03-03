@@ -41,6 +41,12 @@ class KairosBot:
         print("ciaoooo")
         users = UsersDatabase.get_users()
 
+        usersSorted = sorted(users, key = lambda k: k['hall'])
+        for user in usersSorted:
+            print(
+                user['student_id'] + ": " + user["user_pw"] + ' | ' + user['library'] + " -> " + user['hall'] + " | " +
+                user['secondary_hall'])
+
         if bookingType == self.SINGLE_BOOK:
             for user in users:
                 logging.info(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
