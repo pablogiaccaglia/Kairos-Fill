@@ -9,7 +9,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 import selenium.webdriver.support.expected_conditions as EC
 import logging
-from fake_useragent import UserAgent
 from database.users_database import UsersDatabase
 
 class KairosBot:
@@ -93,7 +92,6 @@ class KairosBot:
     def __configChromeOptions(self):
 
         # collegamento con Chromium attraverso Selenium
-        ua = UserAgent()
         chrome_options = webdriver.ChromeOptions()
         chrome_options._binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         chrome_options.add_argument('--no-sandbox')
