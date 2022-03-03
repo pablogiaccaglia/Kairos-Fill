@@ -1,2 +1,2 @@
-web: python autofiller.py
-worker: python autofiller.py
+web: python fillscripts/autofiller.py
+worker: python fillscripts/autofiller.py
