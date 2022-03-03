@@ -21,12 +21,14 @@ class KairosBot:
         self.driver = webdriver.Chrome(executable_path = os.environ.get("CHROMEDRIVER_PATH"),
                                        chrome_options = self.chrome_options)
 
+        print(self.driver.execute_script('return navigator.userAgent'))
+
         self.SINGLE_BOOK = "SINGLE_BOOK"
         self.DOUBLE_BOOK = "DOUBLE_BOOK"
         self.OPTION_1 = "Posto studio in biblioteca [MATTINA]"
         self.OPTION_2 = "Posto studio in biblioteca [POMERIGGIO]"
         self.MAX_RETRIES = 2
-        self.MAX_WAITING_TIME = 40
+        self.MAX_WAITING_TIME = 10
         self.LOGIN_URL = "https://kairos.unifi.it/portalePlanning/BIBL/login.php"
         self.BOOKING_URL = "https://kairos.unifi.it/portalePlanning/BIBL/index.php?include=form"
 
@@ -40,12 +42,6 @@ class KairosBot:
     def start(self, bookingType):
         print("ciaoooo")
         users = UsersDatabase.get_users()
-
-        usersSorted = sorted(users, key = lambda k: k['hall'])
-        for user in usersSorted:
-            print(
-                user['student_id'] + ": " + user["user_pw"] + ' | ' + user['library'] + " -> " + user['hall'] + " | " +
-                user['secondary_hall'])
 
         if bookingType == self.SINGLE_BOOK:
             for user in users:
@@ -103,10 +99,12 @@ class KairosBot:
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36")
+        chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89 Safari/537.36")
+
         return chrome_options
 
     def __goToBookingPage(self, user_id, user_pw):
+
         self.driver.get(self.LOGIN_URL)
 
         # xpath corrispondenti ai campi da riempire e ai box da selezionare (spunta gdpr e box "INVIA")
