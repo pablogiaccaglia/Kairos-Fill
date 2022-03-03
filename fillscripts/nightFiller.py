@@ -21,8 +21,6 @@ class KairosBot:
         self.driver = webdriver.Chrome(executable_path = os.environ.get("CHROMEDRIVER_PATH"),
                                        chrome_options = self.chrome_options)
 
-        print(self.driver.execute_script('return navigator.userAgent'))
-
         self.SINGLE_BOOK = "SINGLE_BOOK"
         self.DOUBLE_BOOK = "DOUBLE_BOOK"
         self.OPTION_1 = "Posto studio in biblioteca [MATTINA]"
@@ -100,6 +98,9 @@ class KairosBot:
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89 Safari/537.36")
+
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
 
         return chrome_options
 
