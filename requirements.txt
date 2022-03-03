@@ -7,3 +7,4 @@ APScheduler==3.6.3
 email_validator==1.1.2
 selenium==3.141.0
 psycopg2==2.8.6
+fake_useragent
