@@ -19,14 +19,15 @@ class KairosBot:
         self.driverPath = os.environ.get("CHROMEDRIVER_PATH")
 
         self.chrome_options = self.__configChromeOptions()
-        self.driver = webdriver.Chrome(executable_path = self.driverPath, options = self.chrome_options)
+        self.driver = webdriver.Chrome(executable_path = os.environ.get("CHROMEDRIVER_PATH"),
+                                       chrome_options = self.chrome_options)
 
         self.SINGLE_BOOK = "SINGLE_BOOK"
         self.DOUBLE_BOOK = "DOUBLE_BOOK"
         self.OPTION_1 = "Posto studio in biblioteca [MATTINA]"
         self.OPTION_2 = "Posto studio in biblioteca [POMERIGGIO]"
         self.MAX_RETRIES = 2
-        self.MAX_WAITING_TIME = 10
+        self.MAX_WAITING_TIME = 40
         self.LOGIN_URL = "https://kairos.unifi.it/portalePlanning/BIBL/login.php"
         self.BOOKING_URL = "https://kairos.unifi.it/portalePlanning/BIBL/index.php?include=form"
 
