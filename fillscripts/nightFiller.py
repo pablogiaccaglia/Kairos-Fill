@@ -17,7 +17,7 @@ class KairosBot:
     def __init__(self):
         self.driverPath = os.environ.get("CHROMEDRIVER_PATH")
         self.chrome_options = self.__configChromeOptions()
-        self.driver = webdriver.Chrome(executable_path = Path("../chromedriver"),
+        self.driver = webdriver.Chrome(executable_path = self.driverPath,
                                        chrome_options = self.chrome_options)
 
         self.SINGLE_BOOK = "SINGLE_BOOK"
