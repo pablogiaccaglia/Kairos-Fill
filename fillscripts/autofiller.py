@@ -11,7 +11,8 @@ def autofiller():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format = '%(process)d-%(levelname)s-%(message)s')
+    logging.basicConfig(format = '%(process)d-%(levelname)s-%(message)s', level = logging.INFO)
+    logging.getLogger().setLevel(logging.INFO)
     start_time = time.time()
     autofiller()
     logging.info("--- %s seconds ---" % (time.time() - start_time))

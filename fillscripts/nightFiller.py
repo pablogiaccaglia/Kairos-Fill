@@ -1,5 +1,6 @@
 import os
 import re
+from pathlib import Path
 
 from selenium.webdriver.support.select import Select
 from selenium import webdriver
@@ -14,11 +15,9 @@ from database.users_database import UsersDatabase
 class KairosBot:
 
     def __init__(self):
-
         self.driverPath = os.environ.get("CHROMEDRIVER_PATH")
-
         self.chrome_options = self.__configChromeOptions()
-        self.driver = webdriver.Chrome(executable_path = os.environ.get("CHROMEDRIVER_PATH"),
+        self.driver = webdriver.Chrome(executable_path = Path("../chromedriver"),
                                        chrome_options = self.chrome_options)
 
         self.SINGLE_BOOK = "SINGLE_BOOK"
@@ -43,7 +42,7 @@ class KairosBot:
 
         if bookingType == self.SINGLE_BOOK:
             for user in users:
-                logging.info(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
+                logging.warning(user['student_id'] + " " + user['user_pw'] + " " + user['hall'])
                 self.__singleBook(self.OPTION_1, user)
 
         elif bookingType == self.DOUBLE_BOOK:
@@ -93,9 +92,9 @@ class KairosBot:
 
         # collegamento con Chromium attraverso Selenium
         chrome_options = webdriver.ChromeOptions()
-        chrome_options._binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+       # chrome_options._binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument("--headless")
+       # chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89 Safari/537.36")
 

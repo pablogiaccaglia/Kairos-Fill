@@ -13,11 +13,6 @@ import logging
 from utils import const as c
 from BotClass import SbaBot
 
-# Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
-logger = logging.getLogger(__name__)
-
 
 def main():
     # Create the Updater and pass it your bot's token.
